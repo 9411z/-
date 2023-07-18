@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+
+// 前向声明
+class Observer;
+
+// 主题类（Subject）
+class Subject {
+public:
+    void Attach(Observer* observer) {
+        observers.push_back(observer);
+    }
+
+    void Detach(Observer* observer) {
+        // 在实际应用中可能需要进行更复杂的逻辑来从观察者列表中删除观察者
+        observers.erase(std::remove(observers.begin(), observers.end(), observer), observers.end());
+    }
+
+    void Notify() {
+        for (Observer* observer : observers) {
+            observer->Update();
+        }
+    }
+
+    void DoSomething() {
+        // 模拟某些操作
+        std::cout << "主题执行了一些操作..." << std::endl;
+        // 通知观察者
+        Notify();
+    }
+
+private:
+    std::vector<Observer*> observers;
+};
+
+// 观察者类（Observer）
+class Observer {
+public:
+    virtual void Update() = 0;
+};
+
+// 具体观察者类（Concrete Observer）
+class ConcreteObserver : public Observer {
+public:
+    ConcreteObserver(Subject* subject) : subject(subject) {
+        // 将自身添加为主题的观察者
+        subject->Attach(this);
+    }
+
+    ~ConcreteObserver() {
+        // 将自身从主题的观察者列表中移除
+        subject->Detach(this);
+    }
+
+    void Update() override {
+        std::cout << "观察者收到通知并执行相应操作..." << std::endl;
+    }
+
+private:
+    Subject* subject;
+};
+
+int main() {
+    // 创建主题和观察者对象
+    Subject subject;
+    ConcreteObserver observer1(&subject);
+    ConcreteObserver observer2(&subject);
+
+    // 主题执行操作并通知观察者
+    subject.DoSomething();
+
+    return 0;
+}
